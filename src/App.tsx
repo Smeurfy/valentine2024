@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./App.module.css";
 import Smiley from "./assets/smiley-sunglasses.webp";
 import ChillCat from "./assets/chill_cat.jpg";
