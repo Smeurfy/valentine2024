@@ -12,17 +12,27 @@ import BabyShark from "./assets/babyShark.gif";
 import NoWords from "./assets/noWords.jpg";
 import Forgive from "./assets/Forgive.jpg";
 import Valentine from "./assets/valentine.gif";
+import Confused from "./assets/confused.jpg";
+import Yespls from "./assets/yespls.jpg";
+import FinalMeme from "./assets/finalMeme.webp";
+import MainAudio from "./assets/mainMusic.mp3";
+import WazzupSound from "./assets/Wazzup.mp3";
+import BabySharkSound from "./assets/BabyShark.mp3";
 
 const messagesWithTimers = [
   { text: "Hey boo", image: Smiley },
   { text: "Whats up girl?", image: ChillCat },
-  { text: "WAAAAAAAZUUU UUUUPPPPPPPPPPP", image: Wazup },
+  { text: "WAAAAAAAZUUU UUUUPPPPPPPPPPP", image: Wazup, audio: WazzupSound },
   { text: "sorry...", image: Releaved },
   { text: "I have an important question to ask you", image: Serious },
   { text: "Do...", image: Embarrassed1 },
   { text: "Do...", image: Embarrassed2 },
   { text: "Do...", image: Embarrassed3 },
-  { text: "BABY SHARK, DOO, DOO, DOO, DOO, DOO, DOO", image: BabyShark },
+  {
+    text: "BABY SHARK, DOO, DOO, DOO, DOO, DOO, DOO",
+    image: BabyShark,
+    audio: BabySharkSound,
+  },
   { text: "...", image: NoWords },
   { text: "pls forgive me...", image: Forgive },
   { text: "Do you want to be my valentine?", image: Valentine },
@@ -30,6 +40,7 @@ const messagesWithTimers = [
 
 function App() {
   const [index, setIndex] = useState(0);
+  const [victory, setVictory] = useState(false);
 
   const showNextMessage = () => {
     setIndex((ind) => ind + 1);
@@ -37,40 +48,86 @@ function App() {
 
   return (
     <>
+      <audio controls autoPlay>
+        <source src={MainAudio} type="audio/mp3"></source>
+      </audio>
       <div className={styles.background}></div>
-      {index < messagesWithTimers.length ? (
-        <Text
-          text={messagesWithTimers[index].text}
-          imgSrc={messagesWithTimers[index].image}
-          onReachHeight={showNextMessage}
-        />
-      ) : (
-        <div>
-          <h1>What do you say monna mor?</h1>
-          <button>No</button>
-          <button>Yes</button>
+      {!victory &&
+        (index < messagesWithTimers.length ? (
+          <MoveElements
+            text={messagesWithTimers[index].text}
+            imgSrc={messagesWithTimers[index].image}
+            audioSrc={messagesWithTimers[index].audio ?? ""}
+            onReachHeight={showNextMessage}
+          />
+        ) : (
+          <FinalMessage onYesClick={() => setVictory(true)} />
+        ))}
+      {victory && (
+        <div className={styles.victoryContainer}>
+          <h1>{"Love you <3!!!"}</h1>
+          <img src={FinalMeme} alt="Final Meme" />
         </div>
       )}
     </>
   );
 }
 
-const Text = ({
+const FinalMessage = ({ onYesClick }: { onYesClick: () => void }) => {
+  const [scale, setScale] = useState(1);
+  const [disabled, setDisabled] = useState(false);
+  const [finalImg, setFinalImg] = useState(false);
+  useEffect(() => {
+    const interval = setTimeout(() => {
+      if (scale < 50) {
+        setScale((scale) => scale + 0.2);
+      }
+      if (scale > 5) setFinalImg(true);
+    }, 1000);
+
+    return () => {
+      clearTimeout(interval);
+    };
+  }, [scale]);
+  return (
+    <div className={styles.finalContainer}>
+      <h1>What do you say monna mor?</h1>
+      <h2>Wanna be my valentine?</h2>
+      <div className={styles.buttonsContainer}>
+        <button disabled={disabled} onClick={() => setDisabled(true)}>
+          No
+        </button>
+        <button
+          style={{ transform: `scale(${scale})` }}
+          onClick={() => onYesClick()}
+        >
+          Yes
+        </button>
+      </div>
+      {disabled && <img src={Confused}></img>}
+      {finalImg && <img src={Yespls}></img>}
+    </div>
+  );
+};
+
+const MoveElements = ({
   text,
   imgSrc,
+  audioSrc,
   onReachHeight,
 }: {
   text: string;
   imgSrc: string;
+  audioSrc?: string;
   onReachHeight: () => void;
 }) => {
   const [position, setPosition] = useState(-200);
 
   useEffect(() => {
     const height = window.innerHeight;
-    const intervalId = setInterval(() => {
+    const intervalId = setTimeout(() => {
       if (position < height + 50) {
-        setPosition((pos) => pos + 5);
+        setPosition((pos) => pos + 1);
       } else {
         clearInterval(intervalId); // Stop the interval when position reaches 600
         onReachHeight(); // Trigger the callback to show the next message
@@ -78,7 +135,9 @@ const Text = ({
       }
     }, 10);
 
-    return () => clearInterval(intervalId); // Cleanup the interval on component unmount
+    return () => clearTimeout(intervalId);
+
+    // Cleanup the interval on component unmount
   }, [position, onReachHeight]);
 
   return (
@@ -86,6 +145,11 @@ const Text = ({
       className={styles.container}
       style={{ position: "absolute", top: `${position}px` }}
     >
+      {audioSrc && (
+        <audio autoPlay>
+          <source src={audioSrc} type="audio/mp3"></source>
+        </audio>
+      )}
       <img className={styles.img} src={imgSrc}></img>
       <p className={styles.text}>{text}</p>
     </div>
