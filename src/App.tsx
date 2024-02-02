@@ -41,6 +41,7 @@ const messagesWithTimers = [
 function App() {
   const [index, setIndex] = useState(0);
   const [victory, setVictory] = useState(false);
+  const [start, setStart] = useState(false);
 
   const showNextMessage = () => {
     setIndex((ind) => ind + 1);
@@ -48,26 +49,43 @@ function App() {
 
   return (
     <>
-      <audio controls autoPlay>
-        <source src={MainAudio} type="audio/mp3"></source>
-      </audio>
-      <div className={styles.background}></div>
-      {!victory &&
-        (index < messagesWithTimers.length ? (
-          <MoveElements
-            text={messagesWithTimers[index].text}
-            imgSrc={messagesWithTimers[index].image}
-            audioSrc={messagesWithTimers[index].audio ?? ""}
-            onReachHeight={showNextMessage}
-          />
-        ) : (
-          <FinalMessage onYesClick={() => setVictory(true)} />
-        ))}
-      {victory && (
-        <div className={styles.victoryContainer}>
-          <h1>{"Love you <3!!!"}</h1>
-          <img src={FinalMeme} alt="Final Meme" />
-        </div>
+      <div style={{ position: "relative", zIndex: `${start ? "-10" : "1"}` }}>
+        <audio
+          onPlay={() => {
+            setStart(true);
+          }}
+          controls
+          autoPlay
+        >
+          <source src={MainAudio} type="audio/mp3"></source>
+        </audio>
+      </div>
+      {!start && (
+        <h1 style={{ marginTop: "60px" }}>
+          Please start the music for a one in a lifetime experience{" "}
+        </h1>
+      )}
+      {start && (
+        <>
+          <div className={styles.background}></div>
+          {!victory &&
+            (index < messagesWithTimers.length ? (
+              <MoveElements
+                text={messagesWithTimers[index].text}
+                imgSrc={messagesWithTimers[index].image}
+                audioSrc={messagesWithTimers[index].audio ?? ""}
+                onReachHeight={showNextMessage}
+              />
+            ) : (
+              <FinalMessage onYesClick={() => setVictory(true)} />
+            ))}
+          {victory && (
+            <div className={styles.victoryContainer}>
+              <h1>{"Love you <3!!!"}</h1>
+              <img src={FinalMeme} alt="Final Meme" />
+            </div>
+          )}
+        </>
       )}
     </>
   );
